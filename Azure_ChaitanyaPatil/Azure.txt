@@ -1,0 +1,86 @@
+AZURE DATA FACTORY
+
+Azure Data Factory is Azure's cloud ETL service for scale-out serverless data integration and data transformation. 
+It offers a code-free UI for intuitive authoring and single-pane-of-glass monitoring and management. 
+You can also lift and shift existing SSIS packages to Azure and run them with full compatibility in ADF.
+
+It is the cloud-based ETL and data integration service that allows you to create data-driven workflows for orchestrating data movement and transforming data at scale. Using Azure Data Factory, you can create and schedule data-driven workflows (called pipelines) that can ingest data from disparate data stores.
+
+
+**********Load the JSON files from blob storage and store the data in SQL table
+1. Create First Pipeline 
+
+	>>A pipeline is a logical grouping of activities that performs a unit of work. Together, the activities in a pipeline perform a task. For example, a pipeline can contain a group of activities that ingests data from an Azure blob, and then runs to partition the data.
+
+**********Get Employee JSON file one by one 
+
+	>>I used copy data transformation for coping data from json storage blob container to SQL table.
+	Error faced for wildcard, watched video for solve that error-- when more 1 file is source in pipeline we can use wildcard (*) but still i facing isuues in loading data in SQL table.
+
+	So, I changed the way Load data into one csv then load that data into SQL table.
+
+	I created testdept table manually into SQl on given server. provide auto increment to dept_id
+
+->Extract employee details from JSON file with multi-threading
+	>>json to csv to sql I get data
+
+->Create the department master table with department id column and load the data
+	-> If Department is existing in table so do not insert the duplicate department name
+		>>I did not find way to find aggregate the column as per requirement So by taking YouTube Reference and Documnetation I rebuild the pipeline with Dataflow Activity
+		
+			"Data flow activities can be operationalized using existing Azure Data Factory scheduling, control, flow, and monitoring capabilities. Mapping data flows provide an entirely visual experience with no coding required. Your data flows run on ADF-managed execution clusters for scaled-out data processing."
+			
+		for not repitation of data I took video help from youtube **Aggregate Transformation in Mapping Data Flow in Azure Data Factory https://www.youtube.com/watch?v=-sxpg-6zgww
+		
+		I created Source and destination and for csv different link services for all data set
+	
+	-> Insert only newly found department from json
+		>>I took source of csv output file from copy data json to csv. Using select action, I select only require columns. then using aggregate function I match JobTitle with name to avoid repetition of data.
+		
+		
+2. Create Second Pipeline	
+->Get Employee JSON file one by one 
+		I did same process to get data from json
+->Extract employee details from JSON file with multi-threading 
+->Load employee details in SQL table with add Department id based on JobTitle column and remove jobTitle column.
+
+	>>Here, I created new sql table for employee details.
+		I tried query in sql server for inner join to achieve requirement. I get the data as per requirement so I did R&D about using join into ADF. from taking help from documentation and video reference
+		https://www.youtube.com/watch?v=zukwayEXRtg
+		
+		I used two sources one is pipeline-1 SQL table and another one is csv for join.
+		
+		I faced many issues and failed dataset into join and mapping.
+
+3. Create Third Pipeline
+	-> Get Json Details from second Pipeline as item parameter for this pipeline
+		I search about parameter in ADF Watched video on Parameterized pipeline video https://www.youtube.com/watch?v=2u6Mo47A9JA
+		having issues in item parameter. it cannot load data from Dataflow
+		So, I asked for explaination and get advice parameter wont work in data flow
+-> Load the data for employee whose get Overtime Pay in SQL table
+		For getting data of overtime pay employees, I run manual query at emp details table.
+		Search about same method in ADF, I find filter transformation while exfloring ADF.
+		took reference from documentation and youtube, and transform the employee data who having overtime pay.
+		filter transformation https://docs.microsoft.com/en-us/azure/data-factory/data-flow-filter
+		https://www.youtube.com/watch?v=hpXePPFqJCs
+		
+4. Create Fourth Pipeline
+	-> Create single pipeline for run the above three pipeline one by one to run whole process.
+	
+		search about how to run all pipeline in one pipeline through execute pipeline
+		https://www.youtube.com/watch?v=nc4IFKkkfXM
+		
+		I single SQL Dataset for all SQL table that created conflict while debuging the 4th pipeline because I used excute pipeline action and each action start after previous method is done. so in 3rd pipeline I took source from pipeline 2nd destination table. which afect the 3rd pipeline. 
+		It makes lots of confusion so I start whole process from begining with proper DS naming and link service naming.
+		
+		without converting into json to csv, I directly transform data into SQL table.
+		
+	
+
+5. Create Trigger
+	-> Create trigger for scheduling to run the fourth pipeline.
+		https://www.youtube.com/watch?v=YqpmDtG8WpI 
+		
+		read about trigger https://docs.microsoft.com/en-us/azure/data-factory/how-to-create-schedule-trigger?tabs=data-factory
+	Select Publish all to publish the changes. Until you publish the changes, the trigger doesn't start triggering the pipeline runs.
+

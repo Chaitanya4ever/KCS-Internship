@@ -1,0 +1,6 @@
+// For loading Jason file
+
+val df = spark.read.option("multiline","true").json("D:/OneDrive - Krish Compusoft Services Pvt Ltd/Spark_Training/hecourses.json")
+
+// For loading CSV
+val df = spark.read.option("multiline","true").csv("D:/OneDrive - Krish Compusoft Services Pvt Ltd/Spark_Training/students.csv")

@@ -1,0 +1,10 @@
+1) analys the data which is on Airline sentiments tweets
+	>>sentiments like positive, negative and natural feedback of customer who using the service of particular air lines
+	>> Reason for being negative is Bad Flight, Customer Service issue, booking issue etc,
+	>> Airline like Virgin America, Delta, American, south west, Us airways and united
+	>> there are retweet counts in particuls user tweets
+	>> particular date and location of tweet
+2) I read the csv using scala
+3) perform some commands like show, count, change its datatype by casting
+4) try to distinct columns
+5) try to print data from same day

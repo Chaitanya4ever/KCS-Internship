@@ -1,0 +1,332 @@
+----------------------------------------------------------Exercise-1-------------------------------------------------------------------------------  
+
+Problem Statement: You have to create data or files from the given dataset (Check Data Tab to access and download the data).  
+
+• hecourses.json  
+
+• students.csv 
+
+ Based on that please accomplish the following activities.  
+
+1. Create this two files in local directory and then upload the hdfs under the spark4 directory.  
+
+2. Use the inbuild schema for the hecourses.json file and create a new Dataframe from this.  
+
+3. Define a new schema for the students.csv as given below column name. a. StdID b. CourseId c. RegistrationDate  
+
+4. Using the above schema create a DataFrame for the "students.csv" data.  
+
+5. Find the list of the courses using both the dataframe which is/are not yet subscribed and then save the result in the "spark4/notsubscribed.json" directory.  
+
+6. Find the total fee collected by each course category. The column name of the total fee collected field should be "TotalFeeCollected"  
+
+7. Save the result in the "spark4/TotalFee.json" 
+
+
+==>
+scala> val heCourseDF = spark.read.option("multiline","true").json("D:/spark4/hecourses.json")
+heCourseDF: org.apache.spark.sql.DataFrame = [Category: string, CourseFee: bigint ... 4 more fields]
+
+scala> heCourseDF.show(false)
++------------+---------+--------+--------------------------------------+------------+--------------+
+|Category    |CourseFee|CourseId|CourseName                            |Subscription|Website       |
++------------+---------+--------+--------------------------------------+------------+--------------+
+|BigData     |7000     |1001    |Hadoop Professional Training          |Annual      |HadoopExam.com|
+|BigData     |7500     |1002    |Spark Professional Training           |Annual      |HadoopExam.com|
+|BigData     |7000     |1003    |PySpark Professional Training         |Annual      |HadoopExam.com|
+|Analytics   |7000     |1004    |Apache Hive Professional Training     |Annual      |HadoopExam.com|
+|Data Science|10000    |1005    |Machine Learning Professional Training|Annual      |HadoopExam.com|
+|Analytics   |7000     |1006    |SAS Base                              |Annual      |HadoopExam.com|
++------------+---------+--------+--------------------------------------+------------+--------------+
+
+
+scala> import org.apache.spark.sql.types.{IntegerType, StringType, StructType, StructField}
+import org.apache.spark.sql.types.{IntegerType, StringType, StructType, StructField}
+
+scala> val simpleSchema = StructType(Array(
+     |       StructField("StdID",StringType,true),
+     |       StructField("CourseId",IntegerType,true),
+     |      StructField("RegistrationDate",StringType,true)
+     |      ))
+simpleSchema: org.apache.spark.sql.types.StructType = StructType(StructField(StdID,StringType,true), StructField(CourseId,IntegerType,true), StructField(RegistrationDate,StringType,true))
+
+val df = spark.read.schema(simpleSchema).option("header","false").option("inferSchema","false").csv("D:/spark4/students.csv")
+df: org.apache.spark.sql.DataFrame = [StdID: string, CourseId: int ... 1 more field]
+
+scala> df.printSchema
+root
+ |-- StdID: string (nullable = true)
+ |-- CourseId: integer (nullable = true)
+ |-- RegistrationDate: string (nullable = true)
+
+
+scala> heCourseDF.join(df,heCourseDF("CourseId") === df("CourseId"),"left").show(false)
++------------+---------+--------+--------------------------------------+------------+--------------+-----+--------+----------------+
+|Category    |CourseFee|CourseId|CourseName                            |Subscription|Website       |StdID|CourseId|RegistrationDate|
++------------+---------+--------+--------------------------------------+------------+--------------+-----+--------+----------------+
+|BigData     |7000     |1001    |Hadoop Professional Training          |Annual      |HadoopExam.com|ST3  |1001    |20200208        |
+|BigData     |7000     |1001    |Hadoop Professional Training          |Annual      |HadoopExam.com|ST2  |1001    |20200204        |
+|BigData     |7500     |1002    |Spark Professional Training           |Annual      |HadoopExam.com|ST9  |1002    |20200209        |
+|BigData     |7500     |1002    |Spark Professional Training           |Annual      |HadoopExam.com|ST2  |1002    |20200206        |
+|BigData     |7000     |1003    |PySpark Professional Training         |Annual      |HadoopExam.com|ST2  |1003    |20200204        |
+|BigData     |7000     |1003    |PySpark Professional Training         |Annual      |HadoopExam.com|ST9  |1003    |20200206        |
+|BigData     |7000     |1003    |PySpark Professional Training         |Annual      |HadoopExam.com|ST4  |1003    |20200211        |
+|BigData     |7000     |1003    |PySpark Professional Training         |Annual      |HadoopExam.com|ST1  |1003    |20200211        |
+|Analytics   |7000     |1004    |Apache Hive Professional Training     |Annual      |HadoopExam.com|ST2  |1004    |20200207        |
+|Analytics   |7000     |1004    |Apache Hive Professional Training     |Annual      |HadoopExam.com|ST6  |1004    |20200207        |
+|Analytics   |7000     |1004    |Apache Hive Professional Training     |Annual      |HadoopExam.com|ST3  |1004    |20200202        |
+|Analytics   |7000     |1004    |Apache Hive Professional Training     |Annual      |HadoopExam.com|ST1  |1004    |20200201        |
+|Data Science|10000    |1005    |Machine Learning Professional Training|Annual      |HadoopExam.com|ST1  |1005    |20200201        |
+|Data Science|10000    |1005    |Machine Learning Professional Training|Annual      |HadoopExam.com|ST7  |1005    |20200202        |
+|Analytics   |7000     |1006    |SAS Base                              |Annual      |HadoopExam.com|null |null    |null            |
++------------+---------+--------+--------------------------------------+------------+--------------+-----+--------+----------------+
+
+scala> heCourseDF.join(df,heCourseDF("CourseId") === df("CourseId"),"left").filter("StdID is null").show(false)
++---------+---------+--------+----------+------------+--------------+-----+--------+----------------+
+|Category |CourseFee|CourseId|CourseName|Subscription|Website       |StdID|CourseId|RegistrationDate|
++---------+---------+--------+----------+------------+--------------+-----+--------+----------------+
+|Analytics|7000     |1006    |SAS Base  |Annual      |HadoopExam.com|null |null    |null            |
++---------+---------+--------+----------+------------+--------------+-----+--------+----------------+
+
+
+
+scala> :paste
+// Entering paste mode (ctrl-D to finish)
+
+heCourseDF.join(df,heCourseDF("CourseId") === df("CourseId"),"left")
+.groupBy("Category")
+.agg($"Category", sum("CourseFee"))
+.withColumnRenamed("sum(CourseFee)", "TotalFeeCollected")
+.show(false)
+
+// Exiting paste mode, now interpreting.
+
++------------+------------+-----------------+
+|Category    |Category    |TotalFeeCollected|
++------------+------------+-----------------+
+|Analytics   |Analytics   |35000            |
+|BigData     |BigData     |57000            |
+|Data Science|Data Science|20000            |
++------------+------------+-----------------+
+
+
+scala> :paste
+// Entering paste mode (ctrl-D to finish)
+
+heCourseDF.join(df,heCourseDF("CourseId") === df("CourseId"),"left")
+.groupBy("Category")
+.agg($"Category", sum("CourseFee"))
+.withColumnRenamed("sum(CourseFee)", "TotalFeeCollected")
+.select($"Category" , $"TotalFeeCollected")
+.write
+.json("hdfs://localhost:9000/spark4/sprak4/TotalFee.json")
+
+// Exiting paste mode, now interpreting.
+
+---------------------------Exercise-2----------------------------------------------------  
+
+Problem Statement: You have to create data or files from the given dataset (Check Data Tab to access and download the data).  
+
+1. Based on that please accomplish the following activities.  
+
+2. Create a DataFrame from the "Courses" datasets. And given three fields as column name below. a. course_id b. course_name c. course_fee  
+
+3. Using the Case Class named Learner and create an RDD for second dataset. a. name b. email c. city  
+
+4. Now show how can you create an RDD into DataFrame.  
+
+5. Now show how can you convert a DataFrame to Dataset.  
+
+==>
+scala> val heUserDF = Seq( (1001, "Hadoop" , 7000) ,(1002, "Spark" , 7000) ,(1003, "Cassandra" , 7000) ,(1004, "Python" , 7000) ).toDF("course_id", "course_name", "course_fee")
+heUserDF: org.apache.spark.sql.DataFrame = [course_id: int, course_name: string ... 1 more field]
+
+
+scala> heUserDF.show()
++---------+-----------+----------+
+|course_id|course_name|course_fee|
++---------+-----------+----------+
+|     1001|     Hadoop|      7000|
+|     1002|      Spark|      7000|
+|     1003|  Cassandra|      7000|
+|     1004|     Python|      7000|
++---------+-----------+----------+
+
+
+scala> case class Learner(name : String , email : String , city :String)
+defined class Learner
+
+scala> val heData = Array( Learner("Amit" , "amit@hadoopexam.com", "Mumbai"), Learner("Rakesh" , "rakesh@hadoopexam.com", "Pune"), Learner("Jonathan" , "jonathan@hadoopexam.com", "NewYork"), Learner("Michael" , "michael@hadoopexam.com", "Washington"), Learner("Simon" , "simon@hadoopexam.com", "HongKong"), Learner("Venkat" , "venkat@hadoopexam.com", "Chennai"), Learner("Roshni" , "roshni@hadoopexam.com", "Banglore") )
+heData: Array[Learner] = Array(Learner(Amit,amit@hadoopexam.com,Mumbai), Learner(Rakesh,rakesh@hadoopexam.com,Pune), Learner(Jonathan,jonathan@hadoopexam.com,NewYork), Learner(Michael,michael@hadoopexam.com,Washington), Learner(Simon,simon@hadoopexam.com,HongKong), Learner(Venkat,venkat@hadoopexam.com,Chennai), Learner(Roshni,roshni@hadoopexam.com,Banglore))
+
+scala> val heRDD = sc.parallelize(heData)
+heRDD: org.apache.spark.rdd.RDD[Learner] = ParallelCollectionRDD[59] at parallelize at <console>:27
+
+scala> val heDF = spark.createDataFrame(heRDD)
+heDF: org.apache.spark.sql.DataFrame = [name: string, email: string ... 1 more field]
+
+scala> heDF.show()
++--------+--------------------+----------+
+|    name|               email|      city|
++--------+--------------------+----------+
+|    Amit| amit@hadoopexam.com|    Mumbai|
+|  Rakesh|rakesh@hadoopexam...|      Pune|
+|Jonathan|jonathan@hadoopex...|   NewYork|
+| Michael|michael@hadoopexa...|Washington|
+|   Simon|simon@hadoopexam.com|  HongKong|
+|  Venkat|venkat@hadoopexam...|   Chennai|
+|  Roshni|roshni@hadoopexam...|  Banglore|
++--------+--------------------+----------+
+
+
+scala> val heDS = spark.createDataFrame(heRDD).as[Learner]
+heDS: org.apache.spark.sql.Dataset[Learner] = [name: string, email: string ... 1 more field]
+
+scala> heDS.show(false)
++--------+-----------------------+----------+
+|name    |email                  |city      |
++--------+-----------------------+----------+
+|Amit    |amit@hadoopexam.com    |Mumbai    |
+|Rakesh  |rakesh@hadoopexam.com  |Pune      |
+|Jonathan|jonathan@hadoopexam.com|NewYork   |
+|Michael |michael@hadoopexam.com |Washington|
+|Simon   |simon@hadoopexam.com   |HongKong  |
+|Venkat  |venkat@hadoopexam.com  |Chennai   |
+|Roshni  |roshni@hadoopexam.com  |Banglore  |
++--------+-----------------------+----------+
+
+
+---------------------------------------------Exercise:3----------------------------------------------------------------------- 
+
+Write a structured query that calculates total and average salaries by department and company-wide. 
+
+==>
+scala> val df = spark.read.options(Map("inferSchema"->"true","delimiter"->",","header"->"true")).csv("D:/OneDrive - Krish Compusoft Services Pvt Ltd/Spark-scala/company.csv")
+df: org.apache.spark.sql.DataFrame = [id: int, name: string ... 2 more fields]
+
+scala> df.show()
++---+-----------------+----------+------+
+| id|             name|department|salary|
++---+-----------------+----------+------+
+|  1|     Hunter Field|        IT|    15|
+|  2|    Leonard Lewis|   Support|    81|
+|  3|     Jason Dawson|   Support|    90|
+|  4|      Andre Grant|   Support|    25|
+|  5|      Earl Walton|        IT|    40|
+|  6|      Alan Hanson|        IT|    24|
+|  7|   Clyde Matthews|   Support|    31|
+|  8|Josephine Leonard|   Support|     1|
+|  9|       Owen Boone|        HR|    27|
+| 10|      Max McBride|        IT|    75|
++---+-----------------+----------+------+
+
+
+scala> df.groupBy("department").agg(avg("salary"),sum("salary")).show()
++----------+-----------+-----------+
+|department|avg(salary)|sum(salary)|
++----------+-----------+-----------+
+|        HR|       27.0|         27|
+|        IT|       38.5|        154|
+|   Support|       45.6|        228|
++----------+-----------+-----------+
+--------------------------------------------------Exercise:4-----------------------------------------------------------------------------------------
+ Write a SPARK query that gives the 1st and 2nd bestsellers per genre.
+INPUT:
+
+id,title,genre,quantity
+1,Hunter Fields,romance,15
+2,Leonard Lewis,thriller,81
+3,Jason Dawson,thriller,90
+4,Andre Grant,thriller,25
+5,Earl Walton,romance,40
+6,Alan Hanson,romance,24
+7,Clyde Matthews,thriller,31
+8,Josephine Leonard,thriller,1
+9,Owen Boone,sci-fi,27
+10,Max McBride,romance,75
+
+==>
+
+scala> import org.apache.spark.sql.functions._
+import org.apache.spark.sql.functions._
+
+scala> import org.apache.spark.sql.expressions.Window
+import org.apache.spark.sql.expressions.Window
+	
+scala> val window = Window.partitionBy("genre").orderBy(desc("quantity"))
+window: org.apache.spark.sql.expressions.WindowSpec = org.apache.spark.sql.expressions.WindowSpec@4a5dbec
+
+scala> val rank_df = csv_read.withColumn("rank", rank().over(window))
+rank_df: org.apache.spark.sql.DataFrame = [id: int, title: string ... 3 more fields]
+
+scala> rank_df.show()
+
++---+-----------------+--------+--------+----+
+| id|            title|   genre|quantity|rank|
++---+-----------------+--------+--------+----+
+| 10|      Max McBride| romance|      75|   1|
+|  5|      Earl Walton| romance|      40|   2|
+|  6|      Alan Hanson| romance|      24|   3|
+|  1|    Hunter Fields| romance|      15|   4|
+|  3|     Jason Dawson|thriller|      90|   1|
+|  2|    Leonard Lewis|thriller|      81|   2|
+|  7|   Clyde Matthews|thriller|      31|   3|
+|  4|      Andre Grant|thriller|      25|   4|
+|  8|Josephine Leonard|thriller|       1|   5|
+|  9|       Owen Boone|  sci-fi|      27|   1|
++---+-----------------+--------+--------+----+
+
+scala> rank_df.filter("rank<3").show(false)
+
++---+-------------+--------+--------+----+
+|id |title        |genre   |quantity|rank|
++---+-------------+--------+--------+----+
+|10 |Max McBride  |romance |75      |1   |
+|5  |Earl Walton  |romance |40      |2   |
+|3  |Jason Dawson |thriller|90      |1   |
+|2  |Leonard Lewis|thriller|81      |2   |
+|9  |Owen Boone   |sci-fi  |27      |1   |
++---+-------------+--------+--------+----+
+
+------------------------------------------------------Exercise:5-----------------------------------------------------------------------------
+ Develop a SPARK query that finds the biggest city among the cities in a dataset.
+INPUT:
+id,name,population
+0,Warsaw,1 764 615
+1,Villeneuve-Loubet,15 020
+2,Vranje,83 524
+3,Pittsburgh,1 775 634
+
+
+=>
+scala> df1.agg(max("population")).show()
++---------------+
+|max(population)|
++---------------+
+|        1775634|
++---------------+
+------------------------------------------------------Exercise:6----------------------------------------------------------------------------
+ Write a SPARK query that calculates the number of days between dates given as text (in some format) and the current date.
+
+INPUT
+
+    08/11/2015"
+   "09/11/2015"
+   "09/12/2015"
+
+
+==>
+
+
+scala> .toDF("date_string").select(
+     |       col("date_string"),
+     |       current_date().as("to_date"),
+     |       datediff(current_date(),col("date_string")).as("diff")
+     |     ).show()
++-----------+----------+----+
+|date_string|   to_date|diff|
++-----------+----------+----+
+| 2015-08-11|2022-06-21|2506|
+| 2015-09-11|2022-06-21|2475|
+| 2015-09-12|2022-06-21|2474|
++-----------+----------+----+

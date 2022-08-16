@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<SharedDataSet xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner" xmlns="http://schemas.microsoft.com/sqlserver/reporting/2010/01/shareddatasetdefinition">
+  <DataSet Name="">
+    <Query>
+      <DataSourceReference>AdventureWorks</DataSourceReference>
+      <CommandText>SELECT DISTINCT 
+                         DATEPART(yyyy, soh.DueDate) AS [Calendar Year], st.Name AS [Sales Territory Group], soh.TotalDue AS [Sales Amount], SUM(sod.OrderQty) AS [Order Quantity], AVG(soh.TotalDue) AS AvgSale, 
+                         pch.StandardCost AS ProductCost, soh.TaxAmt, soh.Freight
+FROM            Sales.SalesOrderHeader AS soh INNER JOIN
+                         Sales.SalesTerritory AS st ON soh.TerritoryID = st.TerritoryID INNER JOIN
+                         Sales.SalesOrderDetail AS sod ON soh.SalesOrderID = sod.SalesOrderID INNER JOIN
+                         Production.ProductCostHistory AS pch ON sod.ProductID = pch.ProductID
+GROUP BY soh.DueDate, st.Name, soh.TotalDue, sod.OrderQty, pch.StandardCost, soh.TaxAmt, soh.Freight
+ORDER BY [Calendar Year]</CommandText>
+    </Query>
+    <Fields>
+      <Field Name="Calendar_Year">
+        <DataField>Calendar Year</DataField>
+        <rd:TypeName>System.Int32</rd:TypeName>
+      </Field>
+      <Field Name="Sales_Territory_Group">
+        <DataField>Sales Territory Group</DataField>
+        <rd:TypeName>System.String</rd:TypeName>
+      </Field>
+      <Field Name="Sales_Amount">
+        <DataField>Sales Amount</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+      <Field Name="Order_Quantity">
+        <DataField>Order Quantity</DataField>
+        <rd:TypeName>System.Int32</rd:TypeName>
+      </Field>
+      <Field Name="AvgSale">
+        <DataField>AvgSale</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+      <Field Name="ProductCost">
+        <DataField>ProductCost</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+      <Field Name="TaxAmt">
+        <DataField>TaxAmt</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+      <Field Name="Freight">
+        <DataField>Freight</DataField>
+        <rd:TypeName>System.Decimal</rd:TypeName>
+      </Field>
+    </Fields>
+  </DataSet>
+</SharedDataSet>

@@ -1,0 +1,11 @@
+AZURE DATA FACTORY
+
+create table carcsvtosql(
+name varchar(50),
+year varchar(50),
+selling_price varchar(50),
+km_driven varchar(50),
+fuel varchar(50),
+seller_type varchar(50),
+transmission varchar(50),
+owner varchar(50)

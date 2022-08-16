@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F14B399A-7131-4C87-9E4B-1186C45EF12D}") = "FirstDemoProj", "FirstDemoProj\FirstDemoProj.rptproj", "{C5C933B8-148F-4A5A-A505-4F9DD09B11F4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Default = Debug|Default
+		DebugLocal|Default = DebugLocal|Default
+		Release|Default = Release|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C5C933B8-148F-4A5A-A505-4F9DD09B11F4}.Debug|Default.ActiveCfg = Debug
+		{C5C933B8-148F-4A5A-A505-4F9DD09B11F4}.Debug|Default.Build.0 = Debug
+		{C5C933B8-148F-4A5A-A505-4F9DD09B11F4}.Debug|Default.Deploy.0 = Debug
+		{C5C933B8-148F-4A5A-A505-4F9DD09B11F4}.DebugLocal|Default.ActiveCfg = DebugLocal
+		{C5C933B8-148F-4A5A-A505-4F9DD09B11F4}.DebugLocal|Default.Build.0 = DebugLocal
+		{C5C933B8-148F-4A5A-A505-4F9DD09B11F4}.Release|Default.ActiveCfg = Release
+		{C5C933B8-148F-4A5A-A505-4F9DD09B11F4}.Release|Default.Build.0 = Release
+		{C5C933B8-148F-4A5A-A505-4F9DD09B11F4}.Release|Default.Deploy.0 = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
